@@ -2,6 +2,7 @@ from sqlalchemy import MetaData
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_serializer import SerializerMixin
 
+
 metadata = MetaData()
 
 # Initialize SQLAlchemy
@@ -63,6 +64,9 @@ class Seat(db.Model):
     seat_number = db.Column(db.String(10), nullable=False)
     is_booked = db.Column(db.Boolean, default=False)
     booking_id = db.Column(db.Integer, db.ForeignKey('booking.id'), unique=True, nullable=True)
+    
+    flight = db.relationship('Flight', back_populates='seats')      
+    booking = db.relationship('Booking', back_populates='seat') 
 
     # def __repr__(self):
     #     return f'Seat {self.seat_number} for flight {self.flight_id} is booked: {self.is_booked}'
