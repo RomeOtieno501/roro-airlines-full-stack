@@ -1,8 +1,8 @@
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
-from server.models import db
+from models import db
 from flask_restful import Api, Resource
-from server.models import Airline, Flight, Passenger, Booking, Seat
+from models import Airline, Flight, Passenger, Booking, Seat
 from datetime import datetime
 from flask_cors import CORS
 import os
