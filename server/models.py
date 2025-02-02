@@ -18,7 +18,9 @@ class Airline(db.Model):
     name = db.Column(db.String(100), nullable=False)
     country = db.Column(db.String(50), nullable=False)
 
-    flights = db.relationship('Flight', back_populates='airline', lazy=True)
+    flights = db.relationship('Flight', back_populates='airline', lazy=True, cascade="all, delete-orphan")
+
+    serialize_rules = ("-flights.airline",)
 
     # def __repr__(self):
     #     return f'Airline {self.name} from {self.country} country with id {self.id}'
@@ -35,8 +37,10 @@ class Flight(db.Model):
     origin = db.Column(db.String(50), nullable=False)
     destination = db.Column(db.String(50), nullable=False)
 
-    seat = db.relationship('Seat', back_populates='flights', lazy=True)
+    seat = db.relationship('Seat', back_populates='flights', lazy=True, cascade="all, delete-orphan")
     airline = db.relationship('Airline', back_populates='flights', lazy=True)
+
+    serialize_rules = ("-seat.flights", "-airline.flights")
 
     # def __repr__(self):
     #     return f'Flight from {self.origin} to {self.destination} by airline {self.airline_id}'
@@ -51,6 +55,8 @@ class Passenger(db.Model):
 
     bookings = db.relationship('Booking', back_populates='passenger', lazy=True)
 
+    serialize_rules = ("-bookings.passenger",)
+
     # def __repr__(self):
     #     return f'Passenger {self.name} with email {self.email}'
 
@@ -64,6 +70,8 @@ class Booking(db.Model):
 
     seat = db.relationship('Seat', back_populates='booking', uselist=False)  # One-to-one relationship with Seat
     passenger = db.relationship('Passenger', back_populates='bookings', lazy=True)
+
+    serialize_rules = ("-seat.booking", "-passenger.bookings")
 
     # def __repr__(self):
     #     return f'Booking for passenger {self.passenger_id} on {self.booking_date}'
@@ -80,6 +88,8 @@ class Seat(db.Model):
     
     flights = db.relationship('Flight', back_populates='seat', lazy=True)      
     booking = db.relationship('Booking', back_populates='seat', uselist=False)  # One-to-one relationship with Booking
+
+    serialize_rules = ("-flights.seat", "-booking.seat")
 
     # def __repr__(self):
     #     return f'Seat {self.seat_number} for flight {self.flight_id} is booked: {self.is_booked}'

@@ -4,11 +4,15 @@ from models import db
 from flask_restful import Api, Resource
 from models import Airline, Flight, Passenger, Booking, Seat
 from datetime import datetime
+from flask_cors import CORS
+import os
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../airlines.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+CORS(app)
 
 migrate = Migrate(app, db)
 
@@ -22,7 +26,15 @@ def convert_to_datetime(date_str):
     except ValueError:
         return None
 
+
 # Flask-RESTful Resources
+class HomeResource(Resource):
+    def get(self):
+        return {"message": "Welcome to the Airlines API!"}, 200
+
+api.add_resource(HomeResource, "/")
+
+
 class AirlineResource(Resource):
     def get(self):
         airlines = Airline.query.all()
@@ -47,7 +59,29 @@ class AirlineResource(Resource):
             "country": new_airline.country
         }, 201 
 
-api.add_resource(AirlineResource, "/airlines")
+    def put(self, id):
+        airline = Airline.query.get(id)
+        if not airline:
+            return {"error": "Airline not found"}, 404
+
+        data = request.get_json()
+        for field in ["name", "country"]:
+            if field in data:
+                setattr(airline, field, data[field])
+
+        db.session.commit()
+        return {"message": "Airline updated", "id": airline.id}, 200
+
+    def delete(self, id):
+        airline = Airline.query.get(id)
+        if not airline:
+            return {"error": "Airline not found"}, 404
+
+        db.session.delete(airline)
+        db.session.commit()
+        return {"message": "Airline deleted"}, 200
+
+api.add_resource(AirlineResource, "/airlines", "/airlines/<int:id>")
 
 
 class FlightResource(Resource):
@@ -78,6 +112,9 @@ class FlightResource(Resource):
         
         if not departure_time or not arrival_time:
             return {"error": "Invalid datetime format. Use YYYY-MM-DDTHH:MM:SS"}, 400
+        
+        if departure_time >= arrival_time:
+            return {"error": "Arrival time must be later than departure time"}, 400
         
         new_flight = Flight(
             airline_id=data["airline_id"],
