@@ -6,3 +6,4 @@ Flask-Migrate==4.0.5
 gunicorn==23.0.0; python_version >= '3.7'
 packaging==24.2; python_version >= '3.8'
 psycopg2-binary==2.9.10; python_version >= '3.8'
+sqlalchemy_serializer==1.4.1
