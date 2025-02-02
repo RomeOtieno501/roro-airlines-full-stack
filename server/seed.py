@@ -1,4 +1,4 @@
-from models import db, Airline, Flight, Passenger, Booking, Seat
+from server.models import db, Airline, Flight, Passenger, Booking, Seat
 from app import app
 from datetime import datetime, timedelta
 
